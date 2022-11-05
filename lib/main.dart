@@ -9,7 +9,8 @@ import 'package:code/Model/diskon_model.dart';
 import 'package:code/Model/rekomendasi_model.dart';
 import 'package:code/Screen/Login_Screen.dart';
 import 'package:code/Screen/SignUp_Screen.dart';
-import 'package:code/database/user_db_helper.dart';
+import 'package:code/database/dbHelper.dart';
+
 import 'package:code/main_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

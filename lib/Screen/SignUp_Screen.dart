@@ -1,8 +1,11 @@
 import 'package:code/Screen/Login_Screen.dart';
+import 'package:code/database/user_class.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../Widget.dart';
+import '../database/dbHelper.dart';
 import '../main.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -13,11 +16,31 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  DBHelper? dbHelper;
+  List<UserClass> userData = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      dbHelper = DBHelper();
+    });
+  }
+
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     final signUpProv = Provider.of<SignUpScreenProvider>(context);
+    dbHelper!.getUser().then((value) {
+      setState(() {
+        userData = value;
+      });
+    });
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: primaryColor,
       appBar: AppBar(
         foregroundColor: Colors.white,
@@ -55,66 +78,79 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 SizedBox(height: 10),
+                Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.values.first,
+                  child: Column(
+                    children: [
+                      MyTextInput(
+                        textEditingController: signUpProv.email,
+                        type: TextInputType.emailAddress,
+                        subtitle: "Email",
+                        onChanged: (val) {
+                          signUpProv.email = val;
+                        },
+                      ),
+                      SizedBox(height: 15),
 
-                // Email
-                MyTextInput(
-                  textEditingController: signUpProv.email,
-                  type: TextInputType.emailAddress,
-                  subtitle: "Email",
-                  onChanged: (val) {
-                    signUpProv.email = val;
-                  },
-                  validator: (val) {},
-                ),
-                SizedBox(height: 15),
+                      // Name
+                      MyTextInput(
+                        textEditingController: signUpProv.name,
+                        type: TextInputType.name,
+                        subtitle: "Nama",
+                        onChanged: (val) {
+                          signUpProv.name = val;
+                        },
+                      ),
+                      SizedBox(height: 15),
 
-                // Name
-                MyTextInput(
-                  textEditingController: signUpProv.name,
-                  type: TextInputType.name,
-                  subtitle: "Nama",
-                  onChanged: (val) {
-                    signUpProv.name = val;
-                  },
-                  validator: (val) {},
-                ),
-                SizedBox(height: 15),
+                      // HP
+                      MyTextInput(
+                        textEditingController: signUpProv.hp,
+                        type: TextInputType.number,
+                        subtitle: "Nomor HP",
+                        onChanged: (val) {
+                          signUpProv.hp = val;
+                        },
+                      ),
+                      SizedBox(height: 15),
 
-                // HP
-                MyTextInput(
-                  textEditingController: signUpProv.hp,
-                  type: TextInputType.number,
-                  subtitle: "Nomor HP",
-                  onChanged: (val) {
-                    signUpProv.hp = val;
-                  },
-                  validator: (val) {},
-                ),
-                SizedBox(height: 15),
+                      // Password
+                      MyTextInput(
+                        textEditingController: signUpProv.password,
+                        type: TextInputType.name,
+                        subtitle: "Password",
+                        secure: signUpProv.isSecure,
+                        onChanged: (val) {
+                          signUpProv.password = val;
+                        },
+                      ),
+                      SizedBox(height: 15),
 
-                // Password
-                MyTextInput(
-                  textEditingController: signUpProv.password,
-                  type: TextInputType.name,
-                  subtitle: "Password",
-                  secure: signUpProv.isSecure,
-                  onChanged: (val) {
-                    signUpProv.password = val;
-                  },
-                  validator: (val) {},
-                ),
-                SizedBox(height: 15),
-
-                SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: MyPrimaryTextButton(
-                    text: "SignUp",
-                    padding: EdgeInsets.symmetric(horizontal: 30),
-                    elevation: 1,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                      SizedBox(height: 20),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: MyPrimaryTextButton(
+                          text: "SignUp",
+                          padding: EdgeInsets.symmetric(horizontal: 30),
+                          elevation: 1,
+                          onPressed: () async {
+                            await dbHelper!.insertUser(UserClass(
+                              id: userData.length,
+                              username: signUpProv.username.text,
+                              name: signUpProv.name.text,
+                              email: signUpProv.email.text,
+                              hp: signUpProv.hp.text,
+                              password: signUpProv.password.text,
+                            ));
+                            if (_formKey.currentState!.validate()) {
+                              dbHelper!.getUser().then((value) => print(value));
+                              Navigator.pop(context);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -127,6 +163,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
 }
 
 class SignUpScreenProvider extends ChangeNotifier {
+  // id
+  TextEditingController _username = TextEditingController();
+  TextEditingController get username => this._username;
+  set username(value) {
+    this._username.text = value;
+    this._username.selection = TextSelection.fromPosition(
+      TextPosition(offset: this._username.text.length),
+    );
+    notifyListeners();
+  }
+
   // Name
   TextEditingController _name = TextEditingController();
   TextEditingController get name => this._name;

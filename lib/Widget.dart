@@ -130,12 +130,14 @@ Widget HomeContainer({
       FocusScope.of(context).unfocus();
     },
     child: Container(
+      constraints: BoxConstraints(
+        minHeight: MediaQuery.of(context).size.height,
+      ),
       width: width ?? double.infinity,
       decoration: BoxDecoration(
         gradient: gradient == true ? MyLinearGradient : null,
         color: bgColor ?? primaryColor,
       ),
-      height: MediaQuery.of(context).size.height,
       child: child,
     ),
   );
@@ -147,16 +149,17 @@ class MyTextInput extends StatelessWidget {
   final String subtitle;
   final onChanged;
   final secure;
-  final validator;
 
-  const MyTextInput({
+  final errorText;
+
+  MyTextInput({
     Key? key,
     required this.textEditingController,
     required this.type,
     required this.subtitle,
     required this.onChanged(val),
     bool? this.secure,
-    required this.validator(val),
+    String? this.errorText,
   }) : super(key: key);
 
   @override
@@ -168,12 +171,15 @@ class MyTextInput extends StatelessWidget {
       children: [
         TextFormField(
           controller: textEditingController,
+          textInputAction: TextInputAction.next,
           style: TextStyle(fontSize: 12),
           keyboardType: type,
           enableSuggestions: true,
+          scrollPadding: EdgeInsets.only(bottom: 40),
           inputFormatters:
               type == "number" ? [FilteringTextInputFormatter.digitsOnly] : [],
           decoration: InputDecoration(
+            errorText: errorText ?? "",
             fillColor: Colors.red,
             labelText: subtitle,
             labelStyle: TextStyle(color: Colors.black),
@@ -187,7 +193,16 @@ class MyTextInput extends StatelessWidget {
           onChanged: (val) {
             onChanged(val);
           },
-          validator: (value) {},
+          onFieldSubmitted: (aw) {
+            FocusScope.of(context).nextFocus();
+          },
+          validator: (val) {
+            if (val == null || val.isEmpty) {
+              return "Tidak Boleh Kosong...";
+            } else {
+              return null;
+            }
+          },
         ),
         Align(
           alignment: Alignment.bottomRight,
@@ -209,7 +224,7 @@ class MyTextInput extends StatelessWidget {
 class MyPrimaryTextButton extends StatelessWidget {
   final String text;
   var padding;
-  final Function() onPressed;
+  final Function()? onPressed;
   var elevation;
 
   MyPrimaryTextButton({

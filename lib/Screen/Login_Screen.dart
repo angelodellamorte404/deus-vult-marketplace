@@ -14,6 +14,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     final loginProv = Provider.of<LoginScreenProvider>(context);
@@ -60,59 +62,64 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 10),
 
                 // Email
-                MyTextInput(
-                  textEditingController: loginProv.email,
-                  type: TextInputType.emailAddress,
-                  subtitle: "Email",
-                  onChanged: (val) {
-                    loginProv.email = val;
-                  },
-                  validator: (val) {},
-                ),
-                SizedBox(height: 15),
-
-                // Password
-                MyTextInput(
-                  textEditingController: loginProv.password,
-                  type: TextInputType.text,
-                  subtitle: "Password",
-                  onChanged: (val) {
-                    loginProv.password = val;
-                  },
-                  secure: loginProv.isSecure,
-                  validator: (val) {},
-                ),
-
-                SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerRight,
+                Form(
+                  key: _formKey,
                   child: Column(
                     children: [
-                      // Login
-                      MyPrimaryTextButton(
-                        text: "Login",
-                        padding: EdgeInsets.symmetric(horizontal: 30),
-                        onPressed: () {
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, '/', (route) => false);
-                          bottomProv.setIndex = 0;
+                      MyTextInput(
+                        textEditingController: loginProv.email,
+                        type: TextInputType.emailAddress,
+                        subtitle: "Email",
+                        onChanged: (val) {
+                          loginProv.email = val;
                         },
                       ),
+                      SizedBox(height: 15),
 
-                      // SignUp
-                      MySecondaryTextButton(
-                        text: "SignUp",
-                        padding: EdgeInsets.symmetric(horizontal: 30),
-                        bgColor: primaryColor,
-                        elevation: 1,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SignUpScreen(),
-                            ),
-                          );
+                      // Password
+                      MyTextInput(
+                        textEditingController: loginProv.password,
+                        type: TextInputType.text,
+                        subtitle: "Password",
+                        onChanged: (val) {
+                          loginProv.password = val;
                         },
+                        secure: loginProv.isSecure,
+                      ),
+
+                      SizedBox(height: 20),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Column(
+                          children: [
+                            // Login
+                            MyPrimaryTextButton(
+                              text: "Login",
+                              padding: EdgeInsets.symmetric(horizontal: 30),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+
+                            // SignUp
+                            MySecondaryTextButton(
+                              text: "SignUp",
+                              padding: EdgeInsets.symmetric(horizontal: 30),
+                              bgColor: primaryColor,
+                              elevation: 1,
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SignUpScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
