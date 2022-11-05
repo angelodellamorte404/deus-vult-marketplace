@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
+import 'database/user_db_helper.dart';
+
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
@@ -33,7 +35,11 @@ class _MainScreenState extends State<MainScreen> {
     final scrollProv = Provider.of<ScrollProvider>(context);
 
     return Scaffold(
-      body: body[bottomProv.index],
+      body: FutureBuilder(
+        builder: (context, snapshot) {
+          return body[bottomProv.index];
+        },
+      ),
       bottomNavigationBar: Container(
         padding: EdgeInsets.all(5),
         decoration: BoxDecoration(color: Colors.transparent),

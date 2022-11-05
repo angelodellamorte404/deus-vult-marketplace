@@ -1,7 +1,9 @@
 import 'package:code/Bottom%20Navigation%20Screen/Profile%20Screen/Navigation/edit_user_navigation.dart';
 import 'package:code/Bottom%20Navigation%20Screen/Profile%20Screen/Provider/data_provider.dart';
+import 'package:code/Screen/Login_Screen.dart';
 import 'package:code/Widget.dart';
 import 'package:code/database/user_class.dart';
+import 'package:code/database/user_db_helper.dart';
 import 'package:code/main.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +16,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  UserDBHelper? userDBHelper;
   List? userData = [];
 
   @override
@@ -24,11 +27,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUser() async {
-    dbHelper.readData().then((value) {
+    userDBHelper = await UserDBHelper();
+    userDBHelper?.readData().then((value) {
       setState(() {
         userData = value;
       });
     });
+  }
+
+  Future<int> _checkUser() async {
+    if (userData!.length > 0) {
+      return 1;
+    }
+    return 0;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    userDBHelper!.closeDB();
   }
 
   @override
@@ -39,73 +56,99 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: MyAppBar(
-          title: Text(
-            "Profile",
-            style: TextStyle(letterSpacing: 3),
-          ),
-          elevation: 0,
-          bgColor: Colors.transparent,
-          spacing: 20,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 90,
-                  backgroundImage: NetworkImage(
-                      "https://res.cloudinary.com/angelo-della-morte-company/image/upload/v1665237301/Deus%20Vult%20MarketPlace/039b2bcf17a73484f964771ac08f63fd_e3sqvu.jpg"),
-                ),
-                SizedBox(height: 10),
-
-                Column(
-                  children: List.generate(userData!.length,
-                      (index) => Text(userData![index].toString())),
-                ),
-
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return EditUserNavigation();
-                        },
+        body: FutureBuilder(
+          future: _checkUser(),
+          builder: (context, AsyncSnapshot snapshot) {
+            if (snapshot.data == 0) {
+              return Padding(
+                padding: EdgeInsets.only(top: 32, left: 8, right: 8),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(.2),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                "Silahkan Login terlebih dahulu",
+                                style:
+                                    TextStyle(fontSize: 30, color: Colors.red),
+                              ),
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: MyPrimaryTextButton(
+                                  text: "Login",
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, '/login_screen');
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  child: Text("Edit Data"),
+                    ],
+                  ),
                 ),
+              );
+            }
 
-                // Nama Lengkap
-                // SizedBox(height: 10),
-                // _DataDiri(
-                //   context,
-                //   subtitle: "Nama Lengkap",
-                //   type: "nama",
-                // ),
-                // SizedBox(height: 20),
+            return Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 30),
 
-                // // Email
-                // _DataDiri(
-                //   context,
-                //   subtitle: "Email",
-                //   type: "email",
-                // ),
-                // SizedBox(height: 20),
+                    // Profile Picture
+                    Align(
+                      alignment: Alignment.center,
+                      child: CircleAvatar(
+                        radius: 75,
+                        backgroundImage: NetworkImage(
+                            "https://res.cloudinary.com/angelo-della-morte-company/image/upload/v1665237301/Deus%20Vult%20MarketPlace/039b2bcf17a73484f964771ac08f63fd_e3sqvu.jpg"),
+                      ),
+                    ),
+                    SizedBox(height: 10),
 
-                // // Nomor HP
-                // _DataDiri(
-                //   context,
-                //   subtitle: "Nomor HP",
-                //   type: "number",
-                // ),
-                // SizedBox(height: 20),
-              ],
-            ),
-          ),
+                    Column(
+                      children: List.generate(
+                        userData!.length,
+                        (index) => Text(
+                          userData![index].toString(),
+                        ),
+                      ),
+                    ),
+
+                    MyPrimaryTextButton(
+                      text: "Login",
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              if (userData!.length > 0) {
+                                return EditUserNavigation();
+                              }
+                              return LoginScreen();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

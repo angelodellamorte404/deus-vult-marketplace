@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:code/Model/diskon_model.dart';
 import 'package:code/Model/kategori_model_home.dart';
@@ -59,28 +60,25 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        body: Snap(
-          controller: scrollProv.scrollController.appBar,
-          child: SingleChildScrollView(
-            controller: scrollProv.scrollController,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20),
-                  _Jumbotron(),
-                  SizedBox(height: 30),
+        body: SingleChildScrollView(
+          controller: scrollProv.scrollController,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 20),
+                _Jumbotron(),
+                SizedBox(height: 30),
 
-                  // Kategori
-                  _Kategori(),
-                  SizedBox(height: 30),
+                // Kategori
+                _Kategori(),
+                SizedBox(height: 30),
 
-                  // Rekomendasi
-                  _Rekomendasi(),
-                  SizedBox(height: 30),
-                ],
-              ),
+                // Rekomendasi
+                _Rekomendasi(),
+                SizedBox(height: 30),
+              ],
             ),
           ),
         ),
@@ -271,22 +269,22 @@ class _Kategori extends StatelessWidget {
     required BuildContext context,
     required Map kategori,
   }) {
-    Future<String> _loadImage() async {
-      var _image = await NetworkImage(kategori["image"]);
-      return _image.url;
-    }
-
     return Material(
       child: MyInkWell(
         child: Stack(
           children: [
-            FutureBuilder(
-              future: _loadImage(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Ink.image(image: NetworkImage(kategori["image"]));
-                }
-                return Ink.image(image: AssetImage(BlurLoading));
+            CachedNetworkImage(
+              imageUrl: kategori['image'],
+              progressIndicatorBuilder: (context, url, progress) {
+                return Align(
+                  alignment: Alignment.center,
+                  child: CircularProgressIndicator(
+                    value: progress.progress,
+                  ),
+                );
+              },
+              errorWidget: (context, url, error) {
+                return Icon(Icons.error);
               },
             ),
             Align(

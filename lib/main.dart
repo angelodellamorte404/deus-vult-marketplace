@@ -7,6 +7,8 @@ import 'package:code/Bottom%20Navigation%20Screen/Profile%20Screen/Provider/data
 import 'package:code/Model/all_model.dart';
 import 'package:code/Model/diskon_model.dart';
 import 'package:code/Model/rekomendasi_model.dart';
+import 'package:code/Screen/Login_Screen.dart';
+import 'package:code/Screen/SignUp_Screen.dart';
 import 'package:code/database/user_db_helper.dart';
 import 'package:code/main_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,12 +16,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-final dbHelper = UserDBHelper();
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await UserDBHelper();
 
   runApp(MultiProvider(
     providers: [
@@ -32,6 +31,8 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (_) => AllModelClass()),
       ChangeNotifierProvider(create: (_) => DiskonModelClass()),
       ChangeNotifierProvider(create: (_) => DataProvider()),
+      ChangeNotifierProvider(create: (_) => LoginScreenProvider()),
+      ChangeNotifierProvider(create: (_) => SignUpScreenProvider()),
     ],
     child: MyApp(),
   ));
@@ -43,10 +44,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MainScreen(),
+      initialRoute: '/',
       theme: MyTheme,
       routes: {
-        "search_navigation": (context) => SearchNavigation(),
+        '/': (context) => MainScreen(),
+        "/search_navigation": (context) => SearchNavigation(),
+        '/login_screen': ((context) => LoginScreen()),
+        '/sign-up_screen': ((context) => SignUpScreen()),
       },
       debugShowCheckedModeBanner: false,
     );
